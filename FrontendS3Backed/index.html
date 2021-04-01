@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>NEIU College Enquiry</title>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.41.0.min.js"></script>
+    <style language="text/css">
+      input#wisdom {
+        padding: 4px;
+        font-size: 1em;
+        width: 400px;
+      }
+
+      input::placeholder {
+        color: #ccc;
+        font-style: italic;
+      }
+
+      p.userRequest {
+        margin: 4px;
+        padding: 4px 10px 4px 10px;
+        border-radius: 4px;
+        min-width: 50%;
+        max-width: 85%;
+        float: left;
+        background-color: #7d7;
+      }
+
+      p.lexResponse {
+        margin: 4px;
+        padding: 4px 10px 4px 10px;
+        border-radius: 4px;
+        text-align: left;
+        min-width: 50%;
+        max-width: 85%;
+        float: right;
+        background-color: #bbf;
+        font-style: italic;
+      }
+
+      p.lexError {
+        margin: 4px;
+        padding: 4px 10px 4px 10px;
+        border-radius: 4px;
+        text-align: right;
+        min-width: 50%;
+        max-width: 85%;
+        float: right;
+        background-color: #f77;
+      }
+    </style>
+  </head>
+
+  <body background="neiu_background.jpg" onload="return pushChat();">
+    <h1 style="text-align: center; color: rgb(13, 225, 240)">
+      NEIU - College Enquiry Chat Bot
+    </h1>
+    <p style="text-align: center; color: rgb(228, 15, 217)">
+      Please use this service anytime to get answers to your Admission Enquiry
+      quickly.
+      <a
+        style="text-align: center"
+        href="https://www.neiu.edu/"
+        title="Northeastern Illinois University"
+        target="_new"
+        >Northeastern Illinois University</a
+      >
+      Try it out.
+    </p>
+    <div
+      id="conversation"
+      style="
+        width: 400px;
+        height: 600px;
+        margin: 0 auto;
+        border: 1px solid #ccc;
+        background-color: #eee;
+        padding: 4px;
+        overflow: scroll;
+      "
+    ></div>
+    <div style="text-align: center">
+      <form
+        id="chatform"
+        style="margin-top: 0px"
+        onsubmit="return pushChat(); "
+      >
+        <input
+          type="text"
+          id="wisdom"
+          size="80"
+          value=""
+          placeholder="What is the eligibility criteria?"
+        />
+      </form>
+      <button
+        style="height: 28px; width: 65px"
+        onClick="window.location.reload();"
+      >
+        clear
+      </button>
+    </div>
+    <script type="text/javascript">
+      // set the focus to the input box
+      document.getElementById("wisdom").focus();
+
+      // Initialize the Amazon Cognito credentials provider
+      AWS.config.region = "us-east-1"; // Region
+      AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        // Provide your Pool Id here
+        IdentityPoolId: "XXXXXXXXXXXXXXXXXXXXX",
+      });
+
+      var lexruntime = new AWS.LexRuntime();
+      var lexUserId = "chatbot-demo" + Date.now();
+      var sessionAttributes = {};
+
+      function callLexRunTime(params, wisdomText) {
+        lexruntime.postText(params, function(err, data) {
+          if (err) {
+            console.log(err, err.stack);
+            showError("Error:  " + err.message + " (see console for details)");
+          }
+          if (data) {
+            // capture the sessionAttributes for the next cycle
+            sessionAttributes = data.sessionAttributes;
+            // show response and/or error/dialog status
+            showResponse(data);
+          }
+          // re-enable input
+          wisdomText.value = "";
+          wisdomText.locked = false;
+        });
+      }
+
+      function pushChat() {
+        // if there is text to be sent...
+        var wisdomText = document.getElementById("wisdom");
+        if (
+          wisdomText &&
+          wisdomText.value &&
+          wisdomText.value.trim().length > 0
+        ) {
+          // disable input to show we're sending it
+          var wisdom = wisdomText.value.trim();
+          wisdomText.value = "please wait....";
+          wisdomText.locked = true;
+
+          // send it to the Lex runtime
+          var params = {
+            botAlias: "CollegeEnquiryBot",
+            botName: "CollegeEnquiryBot",
+            inputText: wisdom,
+            userId: lexUserId,
+            sessionAttributes: sessionAttributes,
+          };
+          showRequest(wisdom);
+          callLexRunTime(params, wisdomText);
+        } else {
+          // send it to the Lex runtime
+          var params = {
+            botAlias: "CollegeEnquiryBot",
+            botName: "CollegeEnquiryBot",
+            inputText: "welcome new student",
+            userId: lexUserId,
+            sessionAttributes: sessionAttributes,
+          };
+          callLexRunTime(params, wisdomText);
+        }
+        // we always cancel form submission
+        return false;
+      }
+
+      function showRequest(daText) {
+        var conversationDiv = document.getElementById("conversation");
+        var requestPara = document.createElement("P");
+        requestPara.className = "userRequest";
+        requestPara.appendChild(document.createTextNode(daText));
+        conversationDiv.appendChild(requestPara);
+        conversationDiv.scrollTop = conversationDiv.scrollHeight;
+      }
+
+      function showError(daText) {
+        var conversationDiv = document.getElementById("conversation");
+        var errorPara = document.createElement("P");
+        errorPara.className = "lexError";
+        errorPara.appendChild(document.createTextNode(daText));
+        conversationDiv.appendChild(errorPara);
+        conversationDiv.scrollTop = conversationDiv.scrollHeight;
+      }
+
+      function showResponse(lexResponse) {
+        console.log("lexResponse => " + JSON.stringify(lexResponse));
+        var conversationDiv = document.getElementById("conversation");
+        var responsePara = document.createElement("P");
+        responsePara.className = "lexResponse";
+        if (lexResponse.message) {
+          const messageList = (lexResponse.message + "").split("<p>");
+          messageList.forEach((element) => {
+            var responsePara1 = document.createElement("P");
+            responsePara1.className = "lexResponse";
+            responsePara1.appendChild(
+              document.createRange().createContextualFragment(element)
+            );
+            responsePara1.appendChild(document.createElement("br"));
+            conversationDiv.appendChild(responsePara1);
+          });
+
+          /* responsePara.appendChild(
+            // document.createTextNode(lexResponse.message)
+            document.createRange().createContextualFragment(lexResponse.message)
+          ); */
+        }
+        if (lexResponse.dialogState === "ReadyForFulfillment") {
+          responsePara.appendChild(
+            document.createTextNode("Ready for fulfillment")
+          );
+          conversationDiv.appendChild(responsePara);
+          // TODO:  show slot values
+        } /* else {
+          responsePara.appendChild(
+            document.createTextNode("(" + lexResponse.dialogState + ")")
+          );
+        } */
+        /*  conversationDiv.appendChild(responsePara); */
+        conversationDiv.scrollTop = conversationDiv.scrollHeight;
+      }
+    </script>
+  </body>
+</html>

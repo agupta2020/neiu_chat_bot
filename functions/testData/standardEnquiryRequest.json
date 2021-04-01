@@ -1,0 +1,135 @@
+{
+  "messageVersion": "1.0",
+  "invocationSource": "FulfillmentCodeHook",
+  "userId": "chatbot-demo1614052018739",
+  "sessionAttributes": {
+    "scenario": "FacilityEnquiry"
+  },
+  "requestAttributes": null,
+  "bot": {
+    "name": "CollegeEnquiryBot",
+    "alias": "CollegeEnquiryBot",
+    "version": "17"
+  },
+  "outputDialogMode": "Text",
+  "currentIntent": {
+    "name": "StandardEnquiryIntent",
+    "slots": {
+      "FirstSelectionSlot": "Facility",
+      "SubReposeSlot": "sports"
+    },
+    "slotDetails": {
+      "FirstSelectionSlot": {
+        "resolutions": [
+          {
+            "value": "Facility"
+          }
+        ],
+        "originalValue": "facility"
+      },
+      "SubReposeSlot": {
+        "resolutions": [
+          {
+            "value": "Sports"
+          }
+        ],
+        "originalValue": "sports"
+      }
+    },
+    "confirmationStatus": "None",
+    "nluIntentConfidenceScore": 1
+  },
+  "alternativeIntents": [
+    {
+      "name": "SportsEnquiryIntent",
+      "slots": {
+        "SportsFacility": "Sports",
+        "SportsType": null
+      },
+      "slotDetails": {
+        "SportsFacility": {
+          "resolutions": [
+            {
+              "value": "Sports"
+            }
+          ],
+          "originalValue": "sports"
+        },
+        "SportsType": null
+      },
+      "confirmationStatus": "None",
+      "nluIntentConfidenceScore": 1
+    },
+    {
+      "name": "AMAZON.FallbackIntent",
+      "slots": {},
+      "slotDetails": {},
+      "confirmationStatus": "None",
+      "nluIntentConfidenceScore": null
+    },
+    {
+      "name": "getTodaysTemp",
+      "slots": {
+        "Location": null
+      },
+      "slotDetails": {
+        "Location": null
+      },
+      "confirmationStatus": "None",
+      "nluIntentConfidenceScore": 0.48
+    },
+    {
+      "name": "SimpleEnquiryIntent",
+      "slots": {
+        "SimpleEnquiryType": null
+      },
+      "slotDetails": {
+        "SimpleEnquiryType": null
+      },
+      "confirmationStatus": "None",
+      "nluIntentConfidenceScore": 0.47
+    }
+  ],
+  "inputTranscript": "sports",
+  "recentIntentSummaryView": [
+    {
+      "intentName": "StandardEnquiryIntent",
+      "checkpointLabel": null,
+      "slots": {
+        "FirstSelectionSlot": "Facility",
+        "SubReposeSlot": null
+      },
+      "confirmationStatus": "None",
+      "dialogActionType": "ElicitSlot",
+      "fulfillmentState": null,
+      "slotToElicit": "SubReposeSlot"
+    },
+    {
+      "intentName": "CancelFlowIntent",
+      "checkpointLabel": null,
+      "slots": {},
+      "confirmationStatus": "None",
+      "dialogActionType": "Close",
+      "fulfillmentState": "Fulfilled",
+      "slotToElicit": null
+    },
+    {
+      "intentName": "GeneralEnquiryIntent",
+      "checkpointLabel": null,
+      "slots": {
+        "Department": null,
+        "GeneralEnquiry": null
+      },
+      "confirmationStatus": "None",
+      "dialogActionType": "ElicitSlot",
+      "fulfillmentState": null,
+      "slotToElicit": "GeneralEnquiry"
+    }
+  ],
+  "sentimentResponse": {
+    "sentimentLabel": "NEUTRAL",
+    "sentimentScore": "{Positive: 0.012436952,Negative: 0.0010455559,Neutral: 0.9852115,Mixed: 0.0013060042}"
+  },
+  "kendraResponse": null,
+  "activeContexts": []
+}

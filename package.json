@@ -1,0 +1,28 @@
+{
+  "name": "neiu-chatbot-sam-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint:js:fix": "./node_modules/.bin/eslint . --fix",
+    "lint:js": "./node_modules/.bin/eslint . -f json -o coverage/eslint.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.829.0"
+  },
+  "devDependencies": {
+    "aws-sdk-mock": "^5.1.0",
+    "eslint": "^7.20.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "jest": "^26.6.3",
+    "lint": "^0.7.0"
+  },
+  "jest": {
+    "collectCoverage": true
+  }
+}

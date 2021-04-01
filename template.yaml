@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-app
+
+  SAM Template for neiu-chat-bot-app
+
+# TO DO;
+# Sample data load to Dynamodb table
+# Create S3 bucket for webhosting
+# Load index.html file to S3 bucket
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 90
+
+Resources:
+  # Add DynamoDb table definition
+  DynamodbTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: neiu-enquiry-datalayer
+      KeySchema:
+        - AttributeName: ItemId
+          KeyType: HASH
+        - AttributeName: ItemType
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: ItemId
+          AttributeType: S
+        - AttributeName: ItemType
+          AttributeType: S
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+  # Add IAM role for Lambda
+  lambdaRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "Neiu-S3DynamoDBReadAccess"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+              - Effect: Allow
+                Action:
+                  - "s3:GetObject"
+                  - "dynamodb:Query"
+                  - "dynamodb:Scan"
+                  - "dynamodb:GetItem"
+                  - "iam:ListRoles"
+                  - "events: *"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                  - "lambda:InvokeAsync"
+                Resource: "arn:aws:lambda:*:*:*"
+
+  GetWeatherDetailsFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: functions/GetWeatherData/
+      Handler: main.lambda_handler
+      Runtime: python2.7
+      Role: !GetAtt lambdaRole.Arn
+  CollegeEnquiryFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: functions/CollegeEnquiry/
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Role: !GetAtt lambdaRole.Arn
+      Environment:
+        Variables:
+          TableName: !Ref DynamodbTable
+          Doc2VecFunction: "neiu-chatbot-app-doc2vecNumpy"
+  TuitionEnquiryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/SimpleEnquiry/
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Role: !GetAtt lambdaRole.Arn
+      Environment:
+        Variables:
+          TableName: !Ref DynamodbTable
+          Doc2VecFunction: "neiu-chatbot-app-doc2vecNumpy"
+  StandardEnquiryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/StandardEnquiry/
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Role: !GetAtt lambdaRole.Arn
+      Environment:
+        Variables:
+          TableName: !Ref DynamodbTable
+          Doc2VecFunction: "neiu-chatbot-app-doc2vecNumpy"
+Outputs:
+  CollegeEnquiryFunction:
+    Description: "CollegeEnquiryFunction Lambda Function ARN"
+    Value: !GetAtt CollegeEnquiryFunction.Arn
+  TuitionEnquiryFunction:
+    Description: "TuitionEnquiryFunction function"
+    Value: !GetAtt TuitionEnquiryFunction.Arn
+  LambdaRole:
+    Description: "lambdaRole"
+    Value: !GetAtt lambdaRole.Arn
+  DynamodbTable:
+    Description: "DynamodbTable"
+    Value: !GetAtt DynamodbTable.Arn
