@@ -1,34 +1,32 @@
 // Load the AWS SDK for JS
-const AWS = require("aws-sdk");
+const AWS = require('aws-sdk');
 
 // Set a region to interact with (make sure it's the same as the region of your table)
-AWS.config.update({ region: "us-east-1" });
+AWS.config.update({ region: 'us-east-1' });
 const lambda = new AWS.Lambda({ region: process.env.REGION });
 // Set a table name that we can use later on
 const tableName = process.env.TableName;
 // DynamoDBClient
 const ddbDocumentClient = new AWS.DynamoDB.DocumentClient();
 
-const lexUtil = require("./lex_utils");
-const getSentences = require("./getSentences");
+const lexUtil = require('./lex_utils');
+const getSentences = require('./getSentences');
 
-const closingMessage =
-  "<p>Would you also like to choose from the following options? <br><br>";
-const ItemNotFoundMessage =
-  "Sorry, but the requested information is not available. I would encourage you to access FAQ website: <a target='_blank' and rel='noopener noreferrer' href='https://www.neiu.edu/academics/registrar-services/faqs'> faqs<a/> ";
-const Facility = "facility";
-const Courses = "courses";
-const Dorms = "studenthousing";
-const NeiuPrograms = "neiuprograms";
+const closingMessage = '<p>Would you also like to choose from the following options? <br><br>';
+const ItemNotFoundMessage = "Sorry, but the requested information is not available. I would encourage you to access FAQ website: <a target='_blank' and rel='noopener noreferrer' href='https://www.neiu.edu/academics/registrar-services/faqs'> faqs<a/> ";
+const Facility = 'facility';
+const Courses = 'courses';
+const Dorms = 'studenthousing';
+const NeiuPrograms = 'neiuprograms';
 
-const FacilityEnquiry = "facilityenquiry";
-const ProgramEnquiry = "prgenquiry";
+const FacilityEnquiry = 'facilityenquiry';
+const ProgramEnquiry = 'prgenquiry';
 
-const SubReposeSlot = "subReponseSlot";
+const SubReposeSlot = 'subReponseSlot';
 
 let outputSessionAttributes;
 // List all the searchKey
-const partitionKey = "standardenquiry";
+const partitionKey = 'standardenquiry';
 let sortKey;
 
 async function fetchSingleItemDdbDc(searchKey) {
@@ -51,8 +49,7 @@ async function fetchSingleItemDdbDc(searchKey) {
 }
 /** ********** Facility ******** */
 async function handleFacilityRequest(intent, inputTranscriptLowercase) {
-  const message =
-    "I  would be happy to help you with the facilities around the campus.  Please select how would you like to continue. <p>Sports<br>Workshops<br>Cafeteria<br>Campus<br>Labs";
+  const message = 'I  would be happy to help you with the facilities around the campus.  Please select how would you like to continue. <p>Sports<br>Workshops<br>Cafeteria<br>Campus<br>Labs';
   outputSessionAttributes.scenario = FacilityEnquiry;
   outputSessionAttributes.userTranscript = inputTranscriptLowercase;
   return lexUtil.elicitSlot(
@@ -60,21 +57,21 @@ async function handleFacilityRequest(intent, inputTranscriptLowercase) {
     intent.name,
     intent.slots,
     SubReposeSlot,
-    lexUtil.buildMessage(message)
+    lexUtil.buildMessage(message),
   );
 }
 async function handleFacilityEnquiryRequest(
   enquiryType,
   NextInputTranscriptLowercase,
-  event
+  event,
 ) {
   const result = await fetchSingleItemDdbDc(
-    enquiryType
+    enquiryType,
     // this is searchKey for DynamoDB payload
   );
   outputSessionAttributes.userTranscript = outputSessionAttributes.userTranscript.concat(
-    " ",
-    NextInputTranscriptLowercase
+    ' ',
+    NextInputTranscriptLowercase,
   );
   const inputTranscript = outputSessionAttributes.userTranscript;
   const doc2VecParams = {
@@ -88,15 +85,14 @@ async function handleFacilityEnquiryRequest(
   delete event.sessionAttributes.userTranscript;
   return lexUtil.close(
     outputSessionAttributes,
-    "Fulfilled",
-    lexUtil.buildMessage(message)
+    'Fulfilled',
+    lexUtil.buildMessage(message),
   );
 }
 
 /** ********** NEIU Program ******** */
 async function handleProgramRequest(intent, inputTranscriptLowercase) {
-  const message =
-    "Northeastern offers over 70 undergraduate and graduate degree programs, plus a wide range of certificate programs to choose from. Please select Academic Department from below list <br>Computer-Science<br>Earth-Science<br>Chemistry<br>Biology<br> Of just type 'Full Directory'";
+  const message = "Northeastern offers over 70 undergraduate and graduate degree programs, plus a wide range of certificate programs to choose from. Please select Academic Department from below list <br>Computer-Science<br>Earth-Science<br>Chemistry<br>Biology<br> Of just type 'Full Directory'";
   outputSessionAttributes.scenario = ProgramEnquiry;
   outputSessionAttributes.userTranscript = inputTranscriptLowercase;
   return lexUtil.elicitSlot(
@@ -104,18 +100,18 @@ async function handleProgramRequest(intent, inputTranscriptLowercase) {
     intent.name,
     intent.slots,
     SubReposeSlot,
-    lexUtil.buildMessage(message)
+    lexUtil.buildMessage(message),
   );
 }
 
 async function handleProgramEnquiryRequest(
   enquiryType,
   NextInputTranscriptLowercase,
-  event
+  event,
 ) {
   outputSessionAttributes.userTranscript = outputSessionAttributes.userTranscript.concat(
-    " ",
-    NextInputTranscriptLowercase
+    ' ',
+    NextInputTranscriptLowercase,
   );
   const inputTranscript = outputSessionAttributes.userTranscript;
   const doc2VecParams = {
@@ -125,7 +121,7 @@ async function handleProgramEnquiryRequest(
   const doc2VecResponse = await lambda.invoke(doc2VecParams).promise();
 
   const result = await fetchSingleItemDdbDc(
-    enquiryType // this is searchKey for DynamoDB payload
+    enquiryType, // this is searchKey for DynamoDB payload
   );
   // const message = result + closingMessage;
   const message = `${
@@ -134,15 +130,15 @@ async function handleProgramEnquiryRequest(
   delete event.sessionAttributes.userTranscript;
   return lexUtil.close(
     outputSessionAttributes,
-    "Fulfilled",
-    lexUtil.buildMessage(message)
+    'Fulfilled',
+    lexUtil.buildMessage(message),
   );
 }
 
 /** ********** Courses ******** */
 async function handleCoursesRequest(inputTranscriptLowercase) {
-  sortKey = "courses";
-  const result = await fetchSingleItemDdbDc("allcourse");
+  sortKey = 'courses';
+  const result = await fetchSingleItemDdbDc('allcourse');
   const inputTranscript = inputTranscriptLowercase;
   const doc2VecParams = {
     FunctionName: process.env.Doc2VecFunction, // the lambda function we are going to invoke
@@ -156,15 +152,15 @@ async function handleCoursesRequest(inputTranscriptLowercase) {
   }${getSentences.getSuggestedSentences(doc2VecResponse)}`;
   return lexUtil.close(
     outputSessionAttributes,
-    "Fulfilled",
-    lexUtil.buildMessage(message)
+    'Fulfilled',
+    lexUtil.buildMessage(message),
   );
 }
 
 /** ********** Student Housing ******** */
 async function handleDormsRequest(inputTranscriptLowercase) {
-  sortKey = "studenthousing";
-  const result = await fetchSingleItemDdbDc("allinfo");
+  sortKey = 'studenthousing';
+  const result = await fetchSingleItemDdbDc('allinfo');
   const inputTranscript = inputTranscriptLowercase;
   const doc2VecParams = {
     FunctionName: process.env.Doc2VecFunction, // the lambda function we are going to invoke
@@ -178,8 +174,8 @@ async function handleDormsRequest(inputTranscriptLowercase) {
   }${getSentences.getSuggestedSentences(doc2VecResponse)}`;
   return lexUtil.close(
     outputSessionAttributes,
-    "Fulfilled",
-    lexUtil.buildMessage(message)
+    'Fulfilled',
+    lexUtil.buildMessage(message),
   );
 }
 
@@ -192,7 +188,7 @@ exports.handler = async (event) => {
     outputSessionAttributes = event.sessionAttributes;
     const firstSelection = event.currentIntent.slots.FirstSelectionSlot.replace(
       /\s+/g,
-      ""
+      '',
     ).toLowerCase();
     if (!outputSessionAttributes.scenario) {
       switch (firstSelection) {
@@ -209,7 +205,7 @@ exports.handler = async (event) => {
       }
     } else {
       const subResponseText = event.currentIntent.slots.subReponseSlot
-        .replace(/\s+/g, "")
+        .replace(/\s+/g, '')
         .toLowerCase();
       const NextInputTranscriptLowercase = event.inputTranscript.toLowerCase();
       switch (outputSessionAttributes.scenario) {
@@ -219,7 +215,7 @@ exports.handler = async (event) => {
           return handleFacilityEnquiryRequest(
             subResponseText,
             NextInputTranscriptLowercase,
-            event
+            event,
           );
         case ProgramEnquiry:
           sortKey = NeiuPrograms;
@@ -227,7 +223,7 @@ exports.handler = async (event) => {
           return handleProgramEnquiryRequest(
             subResponseText,
             NextInputTranscriptLowercase,
-            event
+            event,
           );
 
         default:
@@ -236,7 +232,7 @@ exports.handler = async (event) => {
           return handleFacilityEnquiryRequest(
             subResponseText,
             NextInputTranscriptLowercase,
-            event
+            event,
           );
       }
     }
@@ -244,8 +240,8 @@ exports.handler = async (event) => {
     console.error(error);
     return lexUtil.close(
       {},
-      "Fulfilled",
-      lexUtil.buildMessage(ItemNotFoundMessage)
+      'Fulfilled',
+      lexUtil.buildMessage(ItemNotFoundMessage),
     );
   }
 };
