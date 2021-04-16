@@ -10,7 +10,7 @@ const lexUtil = require("./lex_utils");
 const getSentences = require("./getSentences");
 
 const closingMessage =
-  "<p>Would you like to choose from the following options? <br>";
+  "<p>Would you also like to choose from the following options? <br><br>";
 
 const ItemNotFoundMessage =
   "Sorry,but the requested information is not available. I would encourage you to access FAQ website: : <a target='_blank' and rel='noopener noreferrer' href='https://www.neiu.edu/academics/registrar-services/faqs'> faqs<a/> ";
@@ -66,7 +66,7 @@ exports.handler = async (event) => {
     const doc2VecResponse = await lambda.invoke(doc2VecParams).promise();
     const finalCloseMessage = `${
       result + closingMessage
-    }--${getSentences.getSuggestedSentences(doc2VecResponse)}`;
+    }${getSentences.getSuggestedSentences(doc2VecResponse)}`;
 
     return lexUtil.close(
       {},
@@ -81,7 +81,7 @@ exports.handler = async (event) => {
       lexUtil.buildMessage(
         `${
           ItemNotFoundMessage + closingMessage
-        }--${getSentences.getSuggestedSentences(
+        }${getSentences.getSuggestedSentences(
           await lambda.invoke(doc2VecParams).promise()
         )}`
       )

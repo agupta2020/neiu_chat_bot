@@ -7,5 +7,12 @@ exports.getSuggestedSentences = (doc2VecResponse) => {
     .sort(() => Math.random() - Math.random())
     .slice(0, 5); // only 5 sentences will be shared
   const firstFiveSentenceList = finalSentencesList.slice(0, 5); */
-  return firstFiveSentenceList.join("<br> --");
+  /* return firstFiveSentenceList.join("<br> --"); */
+  const response =
+    `<button type="button" onclick="document.getElementById('wisdom').value='${finalSentencesList[0]}'; return pushChat();">${finalSentencesList[0]}</button><br>` +
+    `<button type="button" onclick="document.getElementById('wisdom').value='${finalSentencesList[1]}'; return pushChat();">${finalSentencesList[1]}</button><br>` +
+    `<button type="button" onclick="document.getElementById('wisdom').value='${finalSentencesList[2]}'; return pushChat();">${finalSentencesList[2]}</button><br>` +
+    `<button type="button" onclick="document.getElementById('wisdom').value='${finalSentencesList[3]}'; return pushChat();">${finalSentencesList[3]}</button><br>` +
+    `<button type="button" onclick="document.getElementById('wisdom').value='${finalSentencesList[4]}'; return pushChat();">${finalSentencesList[4]}</button><br>`;
+  return response;
 };
