@@ -6,4 +6,4 @@
 
 #### Design and End to End flow
 
-![alt text](https://neiu-chat-bot.s3.amazonaws.com/Chat+Bot+Design.jpeg)
+![alt text](https://neiu-chat-bot.s3.amazonaws.com/Chat+Bot+Design_Final.jpeg)
